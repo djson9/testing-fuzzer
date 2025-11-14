@@ -1,0 +1,2121 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  Multi-Page Form Demo - Pennsylvania Business Tax Registration
+
+  Page 1: Demographics (Based on PA screenshots)
+  - Business Entity Information
+    - Legal form dropdown
+    - Profit/Nonprofit radio buttons
+    - IRS exemption radio buttons
+    - ID type dropdown (EIN/SSN/ITIN)
+    - ID text inputf
+    - Optional Entity IDs
+  - Name Section
+    - Legal name, DBA name, Establishment name
+  - Entity Physical Location
+    - Country dropdown, Street 1/2, Unit type/number
+    - City, State dropdown, ZIP, County dropdown
+    - Verify Address button with validation
+    - Additional PA locations radio buttons
+  - Additional Entity Addresses
+    - Mailing address and records location radio buttons
+
+  Page 2: Business Entity Registration (Based on PA screenshots)
+  - Entity acquisition radio buttons
+  - Legal structure change radio buttons
+  - Merger/consolidation/restructuring radio buttons
+  - Date of first operations (date picker)
+  - Date of first operations in PA (date picker, pre-filled)
+  - Business entity fiscal year end (date picker)
+  - Phone country dropdown
+  - Phone type dropdown
+  - Business entity telephone number with extension
+
+  Page 3: Entity Business Activity Information (Based on PA screenshots)
+  - NAICS Instructions box
+  - NAICS verified checkbox
+  - NAICS code table with edit/delete actions
+  - Add a Record button for NAICS codes
+  - Description of business activity (textarea)
+  - Establishment percentage input
+  - Construction activity percentages with auto-calculated sums:
+    - New construction + Renovative construction = Sum
+    - Residential construction + Commercial construction = Sum
+
+  Page 4: Accounts (Based on PA screenshots)
+  - Registration Questions (8 Yes/No radio button groups):
+    - Sales, Use and Hotel Occupancy License
+    - Lottery retailer (past/future)
+    - Employees/withholding
+    - Tobacco License
+    - Promoting shows
+    - Resale/rental
+    - Purchasing without sales tax
+  - Employer Accounts Registration (5 checkboxes):
+    - Employer Withholding Tax (W-2) - checked by default
+    - Other Income Withholding Tax (1099-NEC and 1099-MISC)
+    - Retirement Withholding Tax (1099-R)
+    - Unemployment Compensation
+    - Workers' Compensation Coverage
+
+  Page 5: Entity Establishment Employer Information (Based on PA screenshots)
+  - Entity Establishment Employer Information (5 Yes/No radio button groups):
+    - Employ individuals who work in Pennsylvania - Yes by default
+    - Employ PA residents who work outside of Pennsylvania
+    - Pay remuneration for services to non-employees
+    - Report non-resident withholding on non-employees compensation
+    - Have Form 1099-R reporting for taxable distribution
+  - Employment Information:
+    - Date wages first paid (date picker, pre-filled with 01-Oct-2025)
+    - Date wages resumed when following a break (date picker)
+    - Total number of employees (default: 1)
+    - Employees in new construction (default: 0)
+    - Employees in renovative construction (default: 0)
+    - Estimated gross wages per quarter (default: 6,000.00)
+  - Agency Details:
+    - Workers' Compensation insurance (Yes/No radio buttons)
+    - Reason dropdown if no insurance (default: None of the options apply)
+
+  Page 6: Employer Summary (Based on PA screenshot)
+  - Review/summary page showing selected employer accounts
+  - 5 checkboxes (disabled/read-only):
+    - Employer Withholding Tax (checked)
+    - Other Income Withholding Tax
+    - Retirement Withholding Tax
+    - Unemployment Compensation (checked)
+    - Workers' Compensation Coverage
+  - Instruction to go to previous step to make changes
+
+  Page 7: Owner, Officer, Partner, Shareholder, Responsible Party Information (Based on PA screenshots)
+  - Warning message for single member LLCs
+  - Table showing added owners/officers with columns:
+    - Type, ID, Business/Individual name, Percentage of ownership
+    - Edit and Delete buttons for each row
+  - "+ Add a Record" button to open modal dialog
+  - Modal Dialog with comprehensive form:
+    - Contact section (Type, Title, Individual/Business, Dates, ID, Phone, Email)
+    - Tax Responsibility section (Sales Tax and Withholding Tax radio buttons)
+    - Name section (First, Middle, Last, Suffix)
+    - Address section (Full address with Verify Address button)
+    - Add/Cancel buttons
+
+  Dialogs:
+  - Owner/Officer Dialog: Complex multi-section form for adding owners/partners
+  - Address Dialog: Original address entry (not currently used in main flow)
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Page Form Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    dialog {
+      padding: 20px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      max-width: 400px;
+    }
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .button-bar {
+      margin-top: 20px;
+    }
+    h2 {
+      margin-top: 0;
+    }
+    h3 {
+      margin-top: 25px;
+      margin-bottom: 15px;
+      font-size: 18px;
+      border-bottom: 2px solid #ffa500;
+      padding-bottom: 8px;
+    }
+    .radio-group, .checkbox-group {
+      margin-top: 8px;
+    }
+    input[type="checkbox"], input[type="radio"] {
+      margin-right: 5px;
+    }
+    textarea {
+      font-family: Arial, sans-serif;
+      resize: vertical;
+    }
+    table {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Multi-Page Form Demo</h1>
+
+  <!-- Page 1: Demographics -->
+  <div id="page1" class="page active">
+    <h2>Demographics</h2>
+
+    <!-- Business Entity Information -->
+    <h3>Business Entity Information</h3>
+    <p style="font-size: 14px; color: #666;">Only fields marked with red asterisks are required.</p>
+
+    <div class="form-group">
+      <label>Legal form <span style="color: red;">*</span></label>
+      <select id="btd54zyx" required>
+        <option value="">Required</option>
+        <option value="ASC">Association</option>
+        <option value="BT">Business Trust</option>
+        <option value="CORP">Corporation</option>
+        <option value="EST">Estate</option>
+        <option value="GP">General Partnership</option>
+        <option value="LLC">Limited Liability Company</option>
+        <option value="LLP">Limited Liability Partnership</option>
+        <option value="LP">Limited Partnership</option>
+        <option value="SOL">Sole Proprietor</option>
+        <option value="TRUST">Trust</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Is the business entity organized for profit or non-profit?</label>
+      <div class="radio-group">
+        <input type="radio" id="ytvubcuh" name="profitType" value="nonprofit" style="width: auto;">
+        <label for="ytvubcuh" style="display: inline; font-weight: normal;">Nonprofit</label>
+        <input type="radio" id="t2k9dvz8" name="profitType" value="profit" style="width: auto; margin-left: 15px;">
+        <label for="t2k9dvz8" style="display: inline; font-weight: normal;">Profit</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Has your business received a determination from the Internal Revenue Services (IRS) that this corporation is exempt from federal income tax? <span style="color: red;">*</span></label>
+      <div class="radio-group">
+        <input type="radio" id="r5bbk8jb" name="irsExempt" value="no" style="width: auto;">
+        <label for="r5bbk8jb" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="um0v2l0x" name="irsExempt" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="um0v2l0x" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>ID type <span style="color: red;">*</span></label>
+      <select id="t02o1qv5" required>
+        <option value="">Required</option>
+        <option value="EIN">Federal Employer Identification Number (EIN)</option>
+        <!-- <option value="SSN">Social Security Number (SSN)</option> -->
+        <!-- <option value="ITIN">Individual Taxpayer Identification Number (ITIN)</option> -->
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>ID <span style="color: red;">*</span></label>
+      <input type="text" id="l7biirz1" placeholder="Required" required>
+    </div>
+
+    <div class="form-group">
+      <label>Pennsylvania Department of State Entity ID</label>
+      <input type="text" id="iz4r6h9r" placeholder="">
+    </div>
+
+    <div class="form-group">
+      <label>Notice of Required Registration letter ID</label>
+      <input type="text" id="m0x8n74j" placeholder="">
+    </div>
+
+    <!-- Name Section -->
+    <h3 style="margin-top: 30px;">Name</h3>
+
+    <div class="form-group">
+      <label>Legal name of entity</label>
+      <input type="text" id="phfufseq" placeholder="" style="width: 100%;">
+    </div>
+
+    <div class="form-group">
+      <label>Doing business as (DBA) name</label>
+      <input type="text" id="alw0c7ls" placeholder="">
+    </div>
+
+    <div class="form-group">
+      <label>Establishment location name (if it is different than the DBA name)</label>
+      <input type="text" id="ah6jx3fu" placeholder="">
+    </div>
+
+    <!-- Entity Physical Location -->
+    <h3 style="margin-top: 30px;">Entity Physical location</h3>
+
+    <div class="form-group">
+      <label>Country</label>
+      <select id="leh48oau">
+        <option value="USA" selected>USA</option>
+        <option value="Canada">Canada</option>
+        <option value="Mexico">Mexico</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Street 1 <span style="color: red;">*</span></label>
+      <input type="text" id="xqz7xym7" placeholder="Required" required>
+    </div>
+
+    <div class="form-group">
+      <label>Street 2</label>
+      <input type="text" id="kbvkpx2f" placeholder="">
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+      <label>Unit type</label>
+      <select id="rrfhr1iz">
+        <option value=""></option>
+        <option value="APT">Apartment</option>
+        <option value="BLDG">Building</option>
+        <option value="FL">Floor</option>
+        <option value="STE">Suite</option>
+        <option value="UNIT">Unit</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 48%;">
+      <label>Unit number</label>
+      <input type="text" id="dw8ohwsv" placeholder="">
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+      <label>City <span style="color: red;">*</span></label>
+      <input type="text" id="wybptcs2" placeholder="Required" required>
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 48%;">
+      <label>State</label>
+      <select id="ofblcdyq">
+        <option value="PENNSYLVANIA" selected>PENNSYLVANIA</option>
+        <option value="AL">Alabama</option>
+        <option value="CA">California</option>
+        <option value="NY">New York</option>
+        <option value="TX">Texas</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+      <label>ZIP <span style="color: red;">*</span></label>
+      <input type="text" id="tm0b2879" placeholder="Required" maxlength="5" required>
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 48%;">
+      <label>County <span style="color: red;">*</span></label>
+      <select id="xa0s9nal" required>
+        <option value="">Required</option>
+        <option value="Adams">Adams</option>
+        <option value="Allegheny">Allegheny</option>
+        <option value="Bucks">Bucks</option>
+        <option value="Philadelphia">Philadelphia</option>
+        <option value="Delaware">Delaware</option>
+        <option value="Montgomery">Montgomery</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <button type="button" id="jeu71cxy" onclick="verifyAddress()" style="background: #003f87; color: white; width: 200px;">Verify Address</button>
+      <span id="cebqae8l" style="color: #d32f2f; margin-left: 10px; display: none;">⚠️ Address needs to be verified</span>
+      <span id="kdettwcq" style="color: green; margin-left: 10px; display: none;">Address is verified</span>
+    </div>
+
+    <div class="form-group">
+      <label>Do you have additional PA locations other than listed above? <span style="color: red;">*</span></label>
+      <div class="radio-group">
+        <input type="radio" id="qjcbwr7e" name="additionalLocations" value="no" style="width: auto;">
+        <label for="qjcbwr7e" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="ea7jn2fu" name="additionalLocations" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="ea7jn2fu" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <!-- Additional Entity Addresses -->
+    <h3 style="margin-top: 30px;">Additional Entity Addresses</h3>
+
+    <div class="form-group">
+      <label>Is your business address also your mailing address? <span style="color: red;">*</span></label>
+      <div class="radio-group">
+        <input type="radio" id="j3c6fu47" name="mailingAddress" value="no" style="width: auto;">
+        <label for="j3c6fu47" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="s9a3gtdq" name="mailingAddress" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="s9a3gtdq" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Is your business address also where your records are located? <span style="color: red;">*</span></label>
+      <div class="radio-group">
+        <input type="radio" id="lna0n5s0" name="recordsLocation" value="no" style="width: auto;">
+        <label for="lna0n5s0" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="uxdlmj4h" name="recordsLocation" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="uxdlmj4h" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="button-bar">
+      <button id="actionButton" onclick="handleAction()">Next →</button>
+    </div>
+    <div id="successMessage" style="color: green; font-weight: bold; margin-top: 10px; display: none;">This step is complete!</div>
+    <div id="errorMessage" style="color: red; font-weight: bold; margin-top: 10px; display: none;">Form is not complete</div>
+  </div>
+
+  <!-- Page 2: Business Entity Registration -->
+  <div id="page2" class="page">
+    <h2>Business Entity Registration</h2>
+    <p style="font-size: 14px; color: #666;">Only fields marked with red asterisks are required.</p>
+
+    <div class="form-group">
+      <label>Did this entity acquire all or part of another business entity?</label>
+      <div class="radio-group">
+        <input type="radio" id="bqd6l7cw" name="acquireEntity" value="no" style="width: auto;">
+        <label for="bqd6l7cw" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="s5hs1hdx" name="acquireEntity" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="s5hs1hdx" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Did this entity result from a change in legal structure (for example, from individual proprietor to corporation, partnership to corporation, corporation limited liability company)?</label>
+      <div class="radio-group">
+        <input type="radio" id="i1fecg0c" name="legalStructure" value="no" style="width: auto;">
+        <label for="i1fecg0c" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="a5zr5kuz" name="legalStructure" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="a5zr5kuz" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Did this entity undergo a merger, consolidation, dissolution or other restructuring?</label>
+      <div class="radio-group">
+        <input type="radio" id="pexx370n" name="merger" value="no" style="width: auto;">
+        <label for="pexx370n" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="jqzsnnob" name="merger" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="jqzsnnob" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Date of first operations</label>
+      <input type="date" id="e8cu7r4m" placeholder="">
+    </div>
+
+    <div class="form-group">
+      <label>Date of first operations in PA</label>
+      <input type="date" id="rmg60037">
+    </div>
+
+    <div class="form-group">
+      <label>Business entity fiscal year end</label>
+      <input type="date" id="uiirk6ui" placeholder="">
+    </div>
+
+    <div class="form-group">
+      <label>Phone country</label>
+      <select id="mhsdohb6">
+        <option value="USA" selected>USA</option>
+        <option value="Canada">Canada</option>
+        <option value="Mexico">Mexico</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Phone type</label>
+      <select id="kf1j0dz1">
+        <option value="">Select...</option>
+        <option value="Business Phone">Business Phone</option>
+        <option value="Home Phone">Home Phone</option>
+        <option value="Mobile Phone">Mobile Phone</option>
+        <option value="Fax">Fax</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 68%; margin-right: 2%;">
+      <label>Business entity telephone number</label>
+      <input type="tel" id="g5056auo" placeholder="(555) 555-5555">
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 28%;">
+      <label>Phone extension</label>
+      <input type="text" id="krkkmgm7" placeholder="">
+    </div>
+
+    <div class="button-bar">
+      <button onclick="goToPage(1)">← Back</button>
+      <button id="actionButton" onclick="handleAction()">Next →</button>
+    </div>
+    <div id="successMessage" style="color: green; font-weight: bold; margin-top: 10px; display: none;">This step is complete!</div>
+    <div id="errorMessage" style="color: red; font-weight: bold; margin-top: 10px; display: none;">Form is not complete</div>
+  </div>
+
+  <!-- Page 3: Entity Business Activity Information -->
+  <div id="page3" class="page">
+    <h2>Entity Business Activity Information</h2>
+
+    <h3>Choose North American Industry Classification System (NAICS) code for your primary business activity</h3>
+
+    <div style="background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-left: 4px solid #003f87;">
+      <p style="font-weight: bold; margin-top: 0;">NAICS Instructions</p>
+      <ol style="margin-bottom: 0;">
+        <li>To add NAICS codes, Click on "Add a Record" link.</li>
+        <li>Enter a NAICS code, if you already know it or search for NAICS codes using "Search NAICS Code" button.</li>
+        <li>Enter a word that describes your business in the Keyword field, or enter 2-6 digits of your NAICS code.</li>
+        <li>Select the code from the results list.</li>
+        <li>Enter the percentage for each NAICS code.</li>
+        <li>Specify if this NAICS code is primary or not.</li>
+      </ol>
+    </div>
+
+    <div class="form-group">
+      <input type="checkbox" id="hroxlxtr" style="width: auto;" checked disabled>
+      <label for="hroxlxtr" style="display: inline; font-weight: bold;">NAICS verified</label>
+    </div>
+
+    <p style="font-style: italic; color: #666;">Please select one NAICS Code as Primary.</p>
+
+    <!-- NAICS Code Table -->
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+      <thead>
+        <tr style="background: #f0f0f0; border-bottom: 2px solid #ddd;">
+          <th style="padding: 10px; text-align: left; width: 15%;">NAICS Code</th>
+          <th style="padding: 10px; text-align: left; width: 40%;">NAICS Code description</th>
+          <th style="padding: 10px; text-align: left; width: 15%;">Percentage</th>
+          <th style="padding: 10px; text-align: left; width: 30%;">This is my primary activity</th>
+        </tr>
+      </thead>
+      <tbody id="naicsTableBody">
+        <!-- NAICS codes will be added here dynamically -->
+      </tbody>
+    </table>
+
+    <button type="button" onclick="openNaicsDialog()" style="background: none; border: none; color: #003f87; cursor: pointer; font-weight: bold;">+ Add a Record</button>
+
+    <hr style="margin: 30px 0;">
+
+    <!-- Additional Information Section -->
+    <div class="form-group">
+      <label>Description of business activity</label>
+      <textarea id="wt84tz90" rows="4" style="width: 100%; padding: 8px; box-sizing: border-box;"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Enter the percentage that this establishment's receipts or revenues represent of the total PA receipts or revenues of the Business Entity</label>
+      <input type="number" id="gebymafx" value="0" min="0" max="100" style="width: 150px;">
+    </div>
+
+    <p style="font-weight: bold; margin-top: 30px;">Establishments engaged in construction must enter the percentage of construction activity that is new and/or renovative.</p>
+
+    <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 15px;">
+      <div class="form-group" style="flex: 1; margin-bottom: 0;">
+        <label>New construction</label>
+        <input type="number" id="vro4h60p" value="0" min="0" max="100" oninput="calculateConstructionSum()">
+      </div>
+      <div style="padding-top: 25px; font-size: 20px;">+</div>
+      <div class="form-group" style="flex: 1; margin-bottom: 0;">
+        <label>Renovative construction</label>
+        <input type="number" id="g2fs9wkp" value="0" min="0" max="100" oninput="calculateConstructionSum()">
+      </div>
+      <div style="padding-top: 25px; font-size: 20px;">=</div>
+      <div class="form-group" style="flex: 1; margin-bottom: 0;">
+        <label>Sum of new and renovative construction</label>
+        <input type="number" id="tou48lxr" value="0" readonly style="background: #f5f5f5;">
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 15px;">
+      <div class="form-group" style="flex: 1; margin-bottom: 0;">
+        <label>Residential construction</label>
+        <input type="number" id="e5qbtidj" value="0" min="0" max="100" oninput="calculateCommercialSum()">
+      </div>
+      <div style="padding-top: 25px; font-size: 20px;">+</div>
+      <div class="form-group" style="flex: 1; margin-bottom: 0;">
+        <label>Commercial construction</label>
+        <input type="number" id="j6tu4y0p" value="0" min="0" max="100" oninput="calculateCommercialSum()">
+      </div>
+      <div style="padding-top: 25px; font-size: 20px;">=</div>
+      <div class="form-group" style="flex: 1; margin-bottom: 0;">
+        <label>Sum of residential and commercial construction</label>
+        <input type="number" id="b1n7f2p4" value="0" readonly style="background: #f5f5f5;">
+      </div>
+    </div>
+
+    <div class="button-bar">
+      <button onclick="goToPage(2)">← Back</button>
+      <button id="actionButton" onclick="handleAction()">Next →</button>
+    </div>
+    <div id="successMessage" style="color: green; font-weight: bold; margin-top: 10px; display: none;">This step is complete!</div>
+    <div id="errorMessage" style="color: red; font-weight: bold; margin-top: 10px; display: none;">Form is not complete</div>
+  </div>
+
+  <!-- Page 4: Accounts -->
+  <div id="page4" class="page">
+    <h2>Accounts</h2>
+
+    <h3>Registration Questions</h3>
+
+    <div class="form-group">
+      <label>Is the business entity registering for a Sales, Use and Hotel Occupancy License or Transient Vendor Certificate?</label>
+      <div class="radio-group">
+        <input type="radio" id="lfg8qepr" name="salesLicense" value="no" style="width: auto;">
+        <label for="lfg8qepr" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="ui2rjwh3" name="salesLicense" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="ui2rjwh3" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Has the business entity ever been a lottery retailer in the past?</label>
+      <div class="radio-group">
+        <input type="radio" id="p4z8x8rq" name="lotteryPast" value="no" style="width: auto;">
+        <label for="p4z8x8rq" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="pzc3plvl" name="lotteryPast" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="pzc3plvl" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Does the business entity want to become a Pennsylvania Lottery Retailer?</label>
+      <div class="radio-group">
+        <input type="radio" id="raucqoku" name="lotteryFuture" value="no" style="width: auto;">
+        <label for="raucqoku" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="z2eqpe5t" name="lotteryFuture" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="z2eqpe5t" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Does or will the business entity have employees, non-employees, and/or need to report income withholding?</label>
+      <div class="radio-group">
+        <input type="radio" id="ckpp9vmo" name="employees" value="no" style="width: auto;">
+        <label for="ckpp9vmo" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="opwt9kgm" name="employees" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="opwt9kgm" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Is the business entity registering for a Tobacco License?</label>
+      <div class="radio-group">
+        <input type="radio" id="znjdcp2y" name="tobacco" value="no" style="width: auto;">
+        <label for="znjdcp2y" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="z6oj42d9" name="tobacco" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="z6oj42d9" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Is the business entity actively promoting shows in Pennsylvania where taxable products will be offered for retail sale?</label>
+      <div class="radio-group">
+        <input type="radio" id="whixhy7a" name="promotingShows" value="no" style="width: auto;">
+        <label for="whixhy7a" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="emh2b2rv" name="promotingShows" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="emh2b2rv" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Is the business entity engaged solely in the sale of tangible personal property and/or services for resale or rental?</label>
+      <div class="radio-group">
+        <input type="radio" id="n12ujrnz" name="resale" value="no" style="width: auto;">
+        <label for="n12ujrnz" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="prmaq1cg" name="resale" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="prmaq1cg" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Is the business entity purchasing taxable products or services for its own use in Pennsylvania and incurring no sales tax?</label>
+      <div class="radio-group">
+        <input type="radio" id="a7r9zbtw" name="purchasing" value="no" style="width: auto;">
+        <label for="a7r9zbtw" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="exeza2dn" name="purchasing" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="exeza2dn" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <hr style="margin: 30px 0;">
+
+    <h3>Employer Accounts Registration</h3>
+
+    <div class="form-group">
+      <input type="checkbox" id="a4fpje8i" style="width: auto;">
+      <label for="a4fpje8i" style="display: inline; font-weight: normal;">Employer Withholding Tax (W-2)</label>
+    </div>
+
+    <div class="form-group">
+      <input type="checkbox" id="rwcmk58n" style="width: auto;">
+      <label for="rwcmk58n" style="display: inline; font-weight: normal;">Other Income Withholding Tax (1099-NEC and 1099-MISC)</label>
+    </div>
+
+    <div class="form-group">
+      <input type="checkbox" id="b94s1zyu" style="width: auto;">
+      <label for="b94s1zyu" style="display: inline; font-weight: normal;">Retirement Withholding Tax (1099-R)</label>
+    </div>
+
+    <div class="form-group">
+      <input type="checkbox" id="nb516o2g" style="width: auto;">
+      <label for="nb516o2g" style="display: inline; font-weight: normal;">Unemployment Compensation</label>
+    </div>
+
+    <div class="form-group">
+      <input type="checkbox" id="hfxtvdju" style="width: auto;">
+      <label for="hfxtvdju" style="display: inline; font-weight: normal;">Workers' Compensation Coverage</label>
+    </div>
+
+    <div class="button-bar">
+      <button onclick="goToPage(3)">← Back</button>
+      <button id="actionButton" onclick="handleAction()">Next →</button>
+    </div>
+    <div id="successMessage" style="color: green; font-weight: bold; margin-top: 10px; display: none;">This step is complete!</div>
+    <div id="errorMessage" style="color: red; font-weight: bold; margin-top: 10px; display: none;">Form is not complete</div>
+  </div>
+
+  <!-- Page 5: Entity Establishment Employer Information -->
+  <div id="page5" class="page">
+    <h2>Entity Establishment Employer Information</h2>
+
+    <div class="form-group">
+      <label>Does the establishment employ individuals who work in Pennsylvania?</label>
+      <div class="radio-group">
+        <input type="radio" id="ra80th2i" name="employPA" value="no" style="width: auto;">
+        <label for="ra80th2i" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="v8if1wel" name="employPA" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="v8if1wel" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Does the establishment employ PA residents who work outside of Pennsylvania?</label>
+      <div class="radio-group">
+        <input type="radio" id="dzcxxd91" name="employOutsidePA" value="no" style="width: auto;">
+        <label for="dzcxxd91" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="m1ub28lw" name="employOutsidePA" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="m1ub28lw" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Does the establishment pay remuneration for services to a person(s) you do not consider an employee(s)?</label>
+      <div class="radio-group">
+        <input type="radio" id="zs9g251n" name="nonEmployee" value="no" style="width: auto;">
+        <label for="zs9g251n" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="jdc6tkgu" name="nonEmployee" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="jdc6tkgu" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Does the establishment report non-resident withholding on non-employees compensation, business or lease payments?</label>
+      <div class="radio-group">
+        <input type="radio" id="xrp8sj3j" name="nonResident" value="no" style="width: auto;">
+        <label for="xrp8sj3j" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="nvc440s3" name="nonResident" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="nvc440s3" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Does the establishment have Form 1099-R reporting for taxable distribution from a benefit trust, deferred payment or retirement plan for PA residents?</label>
+      <div class="radio-group">
+        <input type="radio" id="ijbuz98c" name="form1099R" value="no" style="width: auto;">
+        <label for="ijbuz98c" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="nxvt2x8y" name="form1099R" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="nxvt2x8y" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <hr style="margin: 30px 0;">
+
+    <h3>Employment Information</h3>
+
+    <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+      <label>Date wages first paid</label>
+      <input type="date" id="sfwm3auo">
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 48%;">
+      <label>Date wages resumed when following a break in employment</label>
+      <input type="date" id="l5ji3m7l">
+    </div>
+
+    <div class="form-group">
+      <label>Total number of employees</label>
+      <input type="number" id="juxwjaq4" min="0" style="width: 150px;">
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+      <label>Number of employees primarily working in new construction</label>
+      <input type="number" id="peowaajq" min="0">
+    </div>
+
+    <div class="form-group" style="display: inline-block; width: 48%;">
+      <label>Number of employees primarily working in renovative construction</label>
+      <input type="number" id="xfzv0gxt" min="0">
+    </div>
+
+    <div class="form-group">
+      <label>Estimated gross wages per quarter</label>
+      <input type="text" id="qgav8f5i" style="width: 200px;">
+    </div>
+
+    <hr style="margin: 30px 0;">
+
+    <h3>Agency Details</h3>
+
+    <div class="form-group">
+      <label>Does the establishment have Workers' Compensation insurance?</label>
+      <div class="radio-group">
+        <input type="radio" id="kxcbjh7z" name="workersCompInsurance" value="no" style="width: auto;">
+        <label for="kxcbjh7z" style="display: inline; font-weight: normal;">No</label>
+        <input type="radio" id="ttqr7cpp" name="workersCompInsurance" value="yes" style="width: auto; margin-left: 15px;">
+        <label for="ttqr7cpp" style="display: inline; font-weight: normal;">Yes</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>If this establishment does not have Workers' Compensation insurance, Please select one of the options:</label>
+      <select id="iwgumyg1" style="width: 100%;">
+        <option value="none">None of the options apply</option>
+        <option value="exempt">Exempt from Workers' Compensation</option>
+        <option value="pending">Application pending</option>
+        <option value="will_obtain">Will obtain coverage</option>
+      </select>
+    </div>
+
+    <div class="button-bar">
+      <button onclick="goToPage(4)">← Back</button>
+      <button id="actionButton" onclick="handleAction()">Next →</button>
+    </div>
+    <div id="successMessage" style="color: green; font-weight: bold; margin-top: 10px; display: none;">This step is complete!</div>
+    <div id="errorMessage" style="color: red; font-weight: bold; margin-top: 10px; display: none;">Form is not complete</div>
+  </div>
+
+  <!-- Page 6: Employer Summary -->
+  <div id="page6" class="page">
+    <h2>Employer Summary</h2>
+
+    <p>Please review the information below and go to the previous step to make any changes.</p>
+
+    <p style="margin-top: 20px;">Below are the Employer accounts that are requested.</p>
+
+    <div style="background: #f9f9f9; padding: 30px; margin-top: 20px; border: 1px solid #ddd;">
+      <div class="form-group">
+        <input type="checkbox" id="vgt8h7p5" style="width: auto;" disabled>
+        <label for="vgt8h7p5" style="display: inline; font-weight: normal;">Employer Withholding Tax</label>
+      </div>
+
+      <div class="form-group">
+        <input type="checkbox" id="a6etyy44" style="width: auto;" disabled>
+        <label for="a6etyy44" style="display: inline; font-weight: normal;">Other Income Withholding Tax</label>
+      </div>
+
+      <div class="form-group">
+        <input type="checkbox" id="dm2c7jc4" style="width: auto;" disabled>
+        <label for="dm2c7jc4" style="display: inline; font-weight: normal;">Retirement Withholding Tax</label>
+      </div>
+
+      <div class="form-group">
+        <input type="checkbox" id="vziw7lm1" style="width: auto;" disabled>
+        <label for="vziw7lm1" style="display: inline; font-weight: normal;">Unemployment Compensation</label>
+      </div>
+
+      <div class="form-group">
+        <input type="checkbox" id="smdw6ijz" style="width: auto;" disabled>
+        <label for="smdw6ijz" style="display: inline; font-weight: normal;">Workers' Compensation Coverage</label>
+      </div>
+    </div>
+
+    <div class="button-bar">
+      <button onclick="goToPage(5)">← Back</button>
+      <button id="actionButton" onclick="handleAction()">Next →</button>
+    </div>
+    <div id="successMessage" style="color: green; font-weight: bold; margin-top: 10px; display: none;">This step is complete!</div>
+    <div id="errorMessage" style="color: red; font-weight: bold; margin-top: 10px; display: none;">Form is not complete</div>
+  </div>
+
+  <!-- Page 7: Owner, Officer, Partner, Shareholder, Responsible Party Information -->
+  <div id="page7" class="page">
+    <h2>Owner, Officer, Partner, Shareholder, Responsible Party Information</h2>
+
+    <div style="background: #fff3cd; padding: 15px; margin-bottom: 20px; border-left: 4px solid #ff6b6b; display: flex; align-items: center;">
+      <span style="color: #ff6b6b; font-size: 20px; margin-right: 10px;">⚠</span>
+      <span>Single member LLC's must have only one owner/officer.</span>
+    </div>
+
+    <!-- Owners/Partners Table -->
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+      <thead>
+        <tr style="background: #f0f0f0; border-bottom: 2px solid #ddd;">
+          <th style="padding: 10px; text-align: left; width: 20%;">Type</th>
+          <th style="padding: 10px; text-align: left; width: 20%;">ID</th>
+          <th style="padding: 10px; text-align: left; width: 40%;">Business/Individual name</th>
+          <th style="padding: 10px; text-align: left; width: 20%;">Percentage of ownership</th>
+        </tr>
+      </thead>
+      <tbody id="ownersTableBody">
+        <!-- Records will be added here dynamically -->
+      </tbody>
+    </table>
+
+    <button type="button" onclick="openOwnerDialog()" style="background: none; border: none; color: #003f87; cursor: pointer; font-weight: bold;">+ Add a Record</button>
+
+    <div id="d8437pw0" style="margin-top: 30px;">
+      <!-- Owner detail cards will be added here -->
+    </div>
+
+    <div class="button-bar">
+      <button onclick="goToPage(6)">← Back</button>
+      <button id="actionButton" onclick="handleAction()">Submit</button>
+    </div>
+    <div id="successMessage" style="color: green; font-weight: bold; margin-top: 10px; display: none;">This step is complete</div>
+    <div id="errorMessage" style="color: red; font-weight: bold; margin-top: 10px; display: none;">Form is not complete</div>
+  </div>
+
+  <!-- Owner/Officer Dialog -->
+  <dialog id="ownerDialog" style="max-width: 700px; padding: 0; border: none; border-radius: 8px;">
+    <div style="background: #003f87; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="margin: 0; font-size: 18px;">Owner, Officer, Partner, Shareholder, Responsible Party Information</h2>
+      <button onclick="closeOwnerDialog()" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0;">×</button>
+    </div>
+
+    <div style="padding: 20px; max-height: 70vh; overflow-y: auto;">
+      <form id="ownerForm">
+        <!-- Contact Section -->
+        <h3 style="border-bottom: 2px solid #ffa500; padding-bottom: 8px;">Contact</h3>
+
+        <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+          <label>Type</label>
+          <select id="swpm4lmg">
+            <option value="Owner">Owner</option>
+            <option value="Officer - President/Managing Partner">Officer - President/Managing Partner</option>
+            <option value="Officer - Vice President">Officer - Vice President</option>
+            <option value="Officer - Secretary">Officer - Secretary</option>
+            <option value="Officer - Treasurer">Officer - Treasurer</option>
+            <option value="Partner">Partner</option>
+            <option value="Shareholder">Shareholder</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%;">
+          <label>Title</label>
+          <input type="text" id="n2gi5vwn">
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+          <label>Individual or business</label>
+          <select id="fs081g2n">
+            <option value="Individual">Individual</option>
+            <option value="Business">Business</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%;">
+          <label>Title effective date</label>
+          <input type="date" id="mbbysczw">
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+          <label>ID type</label>
+          <select id="f7vhhzvh">
+            <option value="SSN">SSN</option>
+            <option value="EIN">EIN</option>
+            <option value="ITIN">ITIN</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%;">
+          <label>Date of birth</label>
+          <input type="date" id="wegbeqht">
+        </div>
+
+        <div class="form-group">
+          <label>SSN <span style="color: red;">*</span></label>
+          <input type="text" id="ow3r1zge" placeholder="Required" required>
+        </div>
+
+        <div class="form-group">
+          <label>Percentage of ownership</label>
+          <input type="number" id="j175kajv" min="0" max="100" style="width: 150px;">
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+          <label>Phone country</label>
+          <select id="kli3lhoz">
+            <option value="USA">USA</option>
+            <option value="Canada">Canada</option>
+            <option value="Mexico">Mexico</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%;">
+          <label>Phone type <span style="color: red;">*</span></label>
+          <select id="h9yuarbg" required>
+            <option value="">Required</option>
+            <option value="Business Phone">Business Phone</option>
+            <option value="Home Phone">Home Phone</option>
+            <option value="Mobile Phone">Mobile Phone</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Phone number <span style="color: red;">*</span></label>
+          <input type="tel" id="xar4ksr7" placeholder="Required" required>
+        </div>
+
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" id="l1evn805">
+        </div>
+
+        <!-- Tax Responsibility Section -->
+        <h3 style="border-bottom: 2px solid #ffa500; padding-bottom: 8px; margin-top: 30px;">Tax Responsibility</h3>
+
+        <div class="form-group">
+          <label>Is this person responsible to remit Sales Tax?</label>
+          <div class="radio-group">
+            <input type="radio" id="hh1ppcl5" name="ownerSalesTax" value="no" style="width: auto;" checked>
+            <label for="hh1ppcl5" style="display: inline; font-weight: normal;">No</label>
+            <input type="radio" id="d2x97r13" name="ownerSalesTax" value="yes" style="width: auto; margin-left: 15px;">
+            <label for="d2x97r13" style="display: inline; font-weight: normal;">Yes</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Is this person responsible to remit Employer Withholding Tax?</label>
+          <div class="radio-group">
+            <input type="radio" id="ps9lq8ta" name="ownerWithholding" value="no" style="width: auto;" checked>
+            <label for="ps9lq8ta" style="display: inline; font-weight: normal;">No</label>
+            <input type="radio" id="p2rfjmvj" name="ownerWithholding" value="yes" style="width: auto; margin-left: 15px;">
+            <label for="p2rfjmvj" style="display: inline; font-weight: normal;">Yes</label>
+          </div>
+        </div>
+
+        <!-- Name Section -->
+        <h3 style="border-bottom: 2px solid #ffa500; padding-bottom: 8px; margin-top: 30px;">Name</h3>
+
+        <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+          <label>First <span style="color: red;">*</span></label>
+          <input type="text" id="wtqwbwey" placeholder="Required" required>
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%;">
+          <label>Middle</label>
+          <input type="text" id="presme6b">
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+          <label>Last <span style="color: red;">*</span></label>
+          <input type="text" id="fg5o1bki" placeholder="Required" required>
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%;">
+          <label>Suffix</label>
+          <input type="text" id="pdf5z2gx">
+        </div>
+
+        <!-- Address Section -->
+        <h3 style="border-bottom: 2px solid #ffa500; padding-bottom: 8px; margin-top: 30px;">Address</h3>
+
+        <div class="form-group">
+          <label>Country</label>
+          <select id="o037afr5">
+            <option value="USA">USA</option>
+            <option value="Canada">Canada</option>
+            <option value="Mexico">Mexico</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Street 1</label>
+          <input type="text" id="tlnr2tsq">
+        </div>
+
+        <div class="form-group">
+          <label>Street 2</label>
+          <input type="text" id="nv9qvnty">
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+          <label>Unit type</label>
+          <select id="osrmjwhz">
+            <option value=""></option>
+            <option value="APT">Apartment</option>
+            <option value="BLDG">Building</option>
+            <option value="FL">Floor</option>
+            <option value="STE">Suite</option>
+            <option value="UNIT">Unit</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%;">
+          <label>Unit number</label>
+          <input type="text" id="mv8en8he">
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+          <label>City</label>
+          <input type="text" id="h245pn4m">
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%;">
+          <label>State</label>
+          <select id="uofiur9o">
+            <option value="PENNSYLVANIA">PENNSYLVANIA</option>
+            <option value="AL">Alabama</option>
+            <option value="CA">California</option>
+            <option value="NY">New York</option>
+            <option value="TX">Texas</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="display: inline-block; width: 48%; margin-right: 2%;">
+          <label>ZIP</label>
+          <input type="text" id="klbwdhs7" maxlength="10">
+        </div>
+
+        <!-- <div class="form-group" style="display: inline-block; width: 48%;">
+          <label>County <span style="color: red;">*</span></label>
+          <select id="p81sqejq" required>
+            <option value="">Required</option>
+            <option value="Adams">Adams</option>
+            <option value="Allegheny">Allegheny</option>
+            <option value="Bucks">Bucks</option>
+            <option value="Philadelphia">Philadelphia</option>
+            <option value="Delaware">Delaware</option>
+            <option value="Montgomery">Montgomery</option>
+          </select>
+        </div> -->
+
+        <div class="form-group">
+          <button type="button" onclick="verifyOwnerAddress()" style="background: #003f87; color: white; width: 200px; padding: 10px; border: none; cursor: pointer;">Verify Address</button>
+          <span id="cvvzit64" style="color: #d32f2f; margin-left: 10px; display: none;">⚠️ Address needs to be verified</span>
+          <span id="koe678ls" style="color: green; margin-left: 10px; display: none;">Address is verified</span>
+        </div>
+
+        <div id="zebnpovl" style="color: red; font-weight: bold; margin-top: 20px; display: none;">Form is not complete</div>
+        <div style="margin-top: 10px; text-align: right;">
+          <button type="button" onclick="closeOwnerDialog()" style="padding: 10px 20px; margin-right: 10px; background: white; border: 1px solid #ccc; cursor: pointer;">Cancel</button>
+          <button type="button" id="dgvi00xc" onclick="addOwner()" style="padding: 10px 20px; background: #003f87; color: white; border: none; cursor: pointer;">Add</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- NAICS Code Dialog -->
+  <dialog id="naicsDialog" style="max-width: 600px; padding: 0; border: none; border-radius: 8px;">
+    <div style="background: #003f87; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="margin: 0; font-size: 18px;">Add NAICS Code</h2>
+      <button onclick="closeNaicsDialog()" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0;">×</button>
+    </div>
+
+    <div style="padding: 20px;">
+      <form id="naicsForm">
+        <div class="form-group">
+          <label>NAICS Code or Keyword</label>
+          <input type="text" id="qm8l6ef1" placeholder="Enter 2-6 digit code or keyword">
+        </div>
+
+        <div class="form-group">
+          <button type="button" onclick="searchNaicsCode()" style="background: #003f87; color: white; padding: 10px 20px; border: none; cursor: pointer;">Search NAICS Code</button>
+        </div>
+
+        <div class="form-group">
+          <label>NAICS Code</label>
+          <input type="text" id="sr5gqswv" placeholder="Enter NAICS code" required>
+        </div>
+
+        <div class="form-group">
+          <label>NAICS Code Description</label>
+          <input type="text" id="pxq3f87k" placeholder="Enter description" required>
+        </div>
+
+        <div class="form-group">
+          <label>Percentage</label>
+          <input type="number" id="suf69ub7" value="100" min="0" max="100" style="width: 150px;" required>
+        </div>
+
+        <div class="form-group">
+          <input type="checkbox" id="xgdcc0ul" style="width: auto;">
+          <label for="xgdcc0ul" style="display: inline; font-weight: normal;">This is my primary activity</label>
+        </div>
+
+        <div style="margin-top: 30px; text-align: right;">
+          <button type="button" onclick="closeNaicsDialog()" style="padding: 10px 20px; margin-right: 10px; background: white; border: 1px solid #ccc; cursor: pointer;">Cancel</button>
+          <button type="button" onclick="addNaicsCode()" style="padding: 10px 20px; background: #003f87; color: white; border: none; cursor: pointer;">Add</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Popup Dialog with Form -->
+  <dialog id="addressDialog">
+    <h2>Add Address</h2>
+    <form id="addressForm">
+      <div class="form-group">
+        <label>Street:</label>
+        <input type="text" id="bdugmbj3" placeholder="123 Main St">
+      </div>
+      <div class="form-group">
+        <label>City:</label>
+        <input type="text" id="wybptcs2" placeholder="San Francisco">
+      </div>
+      <div class="form-group">
+        <label>State:</label>
+        <select id="ofblcdyq">
+          <option value="">Select...</option>
+          <option value="CA">California</option>
+          <option value="NY">New York</option>
+          <option value="TX">Texas</option>
+          <option value="FL">Florida</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>ZIP:</label>
+        <input type="text" id="tm0b2879" placeholder="94102" maxlength="5">
+      </div>
+      <div class="form-group">
+        <input type="checkbox" id="pfxy4ng6" style="width: auto;">
+        <label for="pfxy4ng6" style="display: inline; font-weight: normal;">Set as primary address</label>
+      </div>
+      <div class="button-bar">
+        <button type="button" onclick="saveAddress()">Save</button>
+        <button type="button" onclick="closeAddressDialog()">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    // Navigate between pages
+    function goToPage(pageNum) {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+        page.style.display = 'none';  // Hide all pages
+      });
+      const targetPage = document.getElementById('page' + pageNum);
+      if (targetPage) {
+        targetPage.classList.add('active');
+        targetPage.style.display = 'block';  // Show only the current page
+      }
+
+      // Sync summary page with selections from Page 4
+      if (pageNum === 6) {
+        document.getElementById('vgt8h7p5').checked = document.getElementById('a4fpje8i').checked;
+        document.getElementById('a6etyy44').checked = document.getElementById('rwcmk58n').checked;
+        document.getElementById('dm2c7jc4').checked = document.getElementById('b94s1zyu').checked;
+        document.getElementById('vziw7lm1').checked = document.getElementById('nb516o2g').checked;
+        document.getElementById('smdw6ijz').checked = document.getElementById('hfxtvdju').checked;
+      }
+    }
+
+    // Generic function to validate required fields on a page
+    function validateRequiredFields(pageId) {
+      const page = document.getElementById(pageId);
+      const requiredInputs = page.querySelectorAll('input[required], select[required]');
+
+      for (let input of requiredInputs) {
+        if (!input.value.trim()) {
+          return false;
+        }
+      }
+
+      // Also check for radio button groups marked as required
+      const requiredLabels = page.querySelectorAll('label');
+      for (let label of requiredLabels) {
+        if (label.innerHTML.includes('color: red') && label.innerHTML.includes('*')) {
+          // Find associated radio buttons
+          const labelText = label.textContent.trim();
+          const radioButtons = page.querySelectorAll('input[type="radio"]');
+          let groupName = null;
+
+          // Find the radio group associated with this label
+          for (let radio of radioButtons) {
+            const radioLabel = page.querySelector(`label[for="yi7pu58b"]`);
+            if (radioLabel && radioLabel.closest('.form-group')?.querySelector('label')?.textContent.includes(labelText.split('*')[0])) {
+              groupName = radio.name;
+              break;
+            }
+          }
+
+          if (groupName) {
+            const checked = page.querySelector(`input[name="${groupName}"]:checked`);
+            if (!checked) {
+              return false;
+            }
+          }
+        }
+      }
+
+      return true;
+    }
+
+    // Unified handler for all page actions (Next/Submit buttons)
+    function handleAction() {
+      console.log('handleAction');
+      // Get current page number from URL or active page
+      const urlParams = new URLSearchParams(window.location.search);
+      let currentPage = parseInt(urlParams.get('page')) || 1;
+
+      // If no page param, find the active page
+      if (!urlParams.has('page')) {
+        const activePage = document.querySelector('.page.active');
+        if (activePage) {
+          currentPage = parseInt(activePage.id.replace('page', ''));
+        }
+      }
+
+      // Get elements from the current page, not globally
+      const currentPageElement = document.getElementById('page' + currentPage);
+      const actionButton = currentPageElement ? currentPageElement.querySelector('#actionButton') : null;
+      const errorMessage = currentPageElement ? currentPageElement.querySelector('#errorMessage') : null;
+      const successMessage = currentPageElement ? currentPageElement.querySelector('#successMessage') : null;
+
+      if (!actionButton) return;
+
+      const isSubmit = (currentPage === 7);
+      const firstClickText = isSubmit ? 'Submit' : 'Next →';
+      const confirmText = isSubmit ? 'Confirm submit' : 'Confirm next';
+
+      // Check if skipValidation parameter is set
+      const skipValidation = urlParams.get('skipValidation') === 'true';
+
+      if (!skipValidation && !validateRequiredFields('page' + currentPage)) {
+        errorMessage.style.display = 'block';
+        successMessage.style.display = 'none';
+        return;
+      }
+
+      console.log('handleAction 2');
+
+      // First click - prepare for confirmation
+      if (actionButton.textContent === firstClickText) {
+        // Handle modifyOnSubmit query parameters (Page 1 only)
+        const modifyId = urlParams.get('modifyOnSubmitId');
+        const modifyValue = urlParams.get('modifyOnSubmitValue');
+
+        if (modifyId) {
+          const element = document.getElementById(modifyId);
+          if (element) {
+            if (element.type === 'radio' || element.type === 'checkbox') {
+              // For radio/checkbox, set checked property
+              if (modifyValue === 'unchecked' || modifyValue === 'null' || modifyValue === null) {
+                element.checked = false;
+              } else if (modifyValue === 'checked' || modifyValue === 'true') {
+                element.checked = true;
+              }
+            } else {
+              // For other inputs, set value
+              if (modifyValue === 'null' || modifyValue === null) {
+                element.value = '';
+              } else if (modifyValue !== null) {
+                element.value = modifyValue;
+              }
+            }
+          }
+        }
+        console.log('handleAction 2.1');
+
+        // Don't validate on first click - just change button text
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+        actionButton.textContent = confirmText;
+        return;
+      }
+
+      console.log('handleAction 3');
+
+      // Validation passed
+      errorMessage.style.display = 'none';
+      actionButton.textContent = firstClickText; // Reset button text
+      successMessage.style.display = 'block';
+    }
+
+    // Handle page query parameter on load
+    window.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const pageParam = urlParams.get('page');
+      if (pageParam) {
+        const pageNum = parseInt(pageParam);
+        if (pageNum >= 1 && pageNum <= 7) {
+          goToPage(pageNum);
+        }
+      }
+
+      // Mark field as required if requiredField parameter is passed
+      const requiredField = urlParams.get('requiredField');
+      if (requiredField) {
+        const element = document.getElementById(requiredField);
+        if (element) {
+          // Add required attribute to the element for validation
+          element.setAttribute('required', 'required');
+
+          // Find the label for this element
+          const labels = document.querySelectorAll('label');
+          labels.forEach(label => {
+            if (label.getAttribute('for') === requiredField ||
+                label.previousElementSibling === element ||
+                label.nextElementSibling === element) {
+              // Add red asterisk if not already present
+              if (!label.innerHTML.includes('color: red')) {
+                label.innerHTML += ' <span style="color: red;">*</span>';
+              }
+            }
+          });
+        }
+      }
+
+      // Remove field if removeFieldId parameter is passed
+      const removeFieldId = urlParams.get('removeFieldId');
+      if (removeFieldId) {
+        const element = document.getElementById(removeFieldId);
+        if (element) {
+          // Find and remove the parent form-group div if it exists
+          let parent = element.closest('.form-group');
+          if (parent) {
+            parent.remove();
+          } else {
+            // If not in a form-group, just remove the element itself
+            element.remove();
+          }
+        }
+      }
+
+      // Add field if addFieldOnPageOne parameter is passed
+      const addFieldType = urlParams.get('addFieldOnPageOne');
+      if (addFieldType) {
+        const registrationLetterField = document.getElementById('m0x8n74j');
+        if (registrationLetterField) {
+          const parentFormGroup = registrationLetterField.closest('.form-group');
+
+          // Create new form group
+          const newFormGroup = document.createElement('div');
+          newFormGroup.className = 'form-group';
+
+          // Create label
+          const label = document.createElement('label');
+          label.textContent = 'Company Name';
+          newFormGroup.appendChild(label);
+
+          // Create field based on type
+          if (addFieldType === 'textInput') {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'additionalField';
+            input.placeholder = '';
+            newFormGroup.appendChild(input);
+          } else if (addFieldType === 'dropdown') {
+            const select = document.createElement('select');
+            select.id = 'additionalField';
+
+            const option1 = document.createElement('option');
+            option1.value = '';
+            option1.textContent = 'Select an option';
+            select.appendChild(option1);
+
+            const option2 = document.createElement('option');
+            option2.value = 'option1';
+            option2.textContent = 'Option 1';
+            select.appendChild(option2);
+
+            const option3 = document.createElement('option');
+            option3.value = 'option2';
+            option3.textContent = 'Option 2';
+            select.appendChild(option3);
+
+            newFormGroup.appendChild(select);
+          } else if (addFieldType === 'radio') {
+            const radioGroup = document.createElement('div');
+            radioGroup.className = 'radio-group';
+
+            const radio1 = document.createElement('input');
+            radio1.type = 'radio';
+            radio1.id = 'additionalFieldYes';
+            radio1.name = 'additionalField';
+            radio1.value = 'yes';
+            radio1.style.width = 'auto';
+
+            const label1 = document.createElement('label');
+            label1.setAttribute('for', 'additionalFieldYes');
+            label1.style.display = 'inline';
+            label1.style.fontWeight = 'normal';
+            label1.textContent = 'Yes';
+
+            const radio2 = document.createElement('input');
+            radio2.type = 'radio';
+            radio2.id = 'additionalFieldNo';
+            radio2.name = 'additionalField';
+            radio2.value = 'no';
+            radio2.style.width = 'auto';
+            radio2.style.marginLeft = '15px';
+
+            const label2 = document.createElement('label');
+            label2.setAttribute('for', 'additionalFieldNo');
+            label2.style.display = 'inline';
+            label2.style.fontWeight = 'normal';
+            label2.textContent = 'No';
+
+            radioGroup.appendChild(radio1);
+            radioGroup.appendChild(label1);
+            radioGroup.appendChild(radio2);
+            radioGroup.appendChild(label2);
+
+            newFormGroup.appendChild(radioGroup);
+          }
+
+          // Insert after the registration letter ID field
+          if (parentFormGroup && parentFormGroup.nextSibling) {
+            parentFormGroup.parentNode.insertBefore(newFormGroup, parentFormGroup.nextSibling);
+          }
+        }
+      }
+
+      // Set initial field value if initialFieldId parameter is passed
+      const initialFieldId = urlParams.get('initialFieldId');
+      const initialFieldValue = urlParams.get('initialFieldValue');
+      if (initialFieldId && initialFieldValue) {
+        const element = document.getElementById(initialFieldId);
+        if (element) {
+          if (element.type === 'radio') {
+            // For radio buttons, find the one with the matching value
+            const radioGroup = document.querySelectorAll(`input[name="${element.name}"]`);
+            radioGroup.forEach(radio => {
+              if (radio.value === initialFieldValue) {
+                radio.checked = true;
+              }
+            });
+          } else if (element.type === 'checkbox') {
+            element.checked = (initialFieldValue === 'true' || initialFieldValue === 'checked');
+          } else {
+            element.value = initialFieldValue;
+          }
+        }
+      }
+
+      // Handle sticky field functionality
+      const stickyId = urlParams.get('stickyId');
+      const stickyValue = urlParams.get('stickyValue');
+      if (stickyId && stickyValue !== null) {
+        const stickyElement = document.getElementById(stickyId);
+        if (stickyElement) {
+          // Store the sticky value
+          stickyElement.dataset.stickyValue = stickyValue;
+
+          // Set initial value to sticky value
+          if (stickyElement.type === 'checkbox' || stickyElement.type === 'radio') {
+            const shouldBeChecked = (stickyValue === 'checked' || stickyValue === 'true');
+            stickyElement.checked = shouldBeChecked;
+          } else {
+            stickyElement.value = stickyValue;
+          }
+
+          // Add input listener to revert changes
+          stickyElement.addEventListener('input', function(e) {
+            const currentValue = e.target.value;
+            const stickyValue = e.target.dataset.stickyValue;
+
+            // If value changed, revert it back after a short delay
+            if (currentValue !== stickyValue) {
+              setTimeout(() => {
+                e.target.value = stickyValue;
+              }, 100);
+            }
+          });
+
+          // Add change listener for dropdowns and other select elements
+          stickyElement.addEventListener('change', function(e) {
+            const currentValue = e.target.value;
+            const stickyValue = e.target.dataset.stickyValue;
+
+            // Revert to sticky value
+            if (currentValue !== stickyValue) {
+              setTimeout(() => {
+                e.target.value = stickyValue;
+              }, 100);
+            }
+          });
+
+          // For checkboxes and radio buttons
+          if (stickyElement.type === 'checkbox' || stickyElement.type === 'radio') {
+            stickyElement.addEventListener('click', function(e) {
+              const stickyValue = e.target.dataset.stickyValue;
+              const shouldBeChecked = (stickyValue === 'checked' || stickyValue === 'true');
+
+              // Revert to sticky state
+              setTimeout(() => {
+                e.target.checked = shouldBeChecked;
+              }, 100);
+            });
+          }
+        }
+      }
+    });
+
+    // Open address popup
+    function openAddressDialog() {
+      document.getElementById('addressDialog').showModal();
+    }
+
+    // Close address popup
+    function closeAddressDialog() {
+      document.getElementById('addressDialog').close();
+    }
+
+    // Save address from popup to main form
+    function saveAddress() {
+      const street = document.getElementById('bdugmbj3').value;
+      const city = document.getElementById('wybptcs2').value;
+      const state = document.getElementById('ofblcdyq').value;
+      const zip = document.getElementById('tm0b2879').value;
+      const isPrimary = document.getElementById('pfxy4ng6').checked;
+
+      let fullAddress = `${street}, ${city}`;
+      if (state) fullAddress += `, ${state}`;
+      fullAddress += ` ${zip}`;
+      if (isPrimary) fullAddress += ' (Primary)';
+
+      document.getElementById('sdr8r9kc').value = fullAddress;
+
+      closeAddressDialog();
+      // Clear form
+      document.getElementById('addressForm').reset();
+    }
+
+    // Verify address button
+    function verifyAddress() {
+      const warning = document.getElementById('cebqae8l');
+      const verified = document.getElementById('kdettwcq');
+      const street1 = document.getElementById('xqz7xym7').value;
+      const city = document.getElementById('wybptcs2').value;
+      const zip = document.getElementById('tm0b2879').value;
+
+      if (street1 && city && zip) {
+        warning.style.display = 'none';
+        verified.style.display = 'inline';
+        alert('Address verified successfully!');
+      } else {
+        warning.style.display = 'inline';
+        verified.style.display = 'none';
+      }
+    }
+
+    // Change status button logic
+    function changeStatus() {
+      const statusField = document.getElementById('n9p5cg9a');
+      if (statusField.value === 'Pending') {
+        statusField.value = 'Approved';
+      } else {
+        statusField.value = 'Pending';
+      }
+    }
+
+    // Format business phone input
+    document.getElementById('g5056auo').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 0) {
+        if (value.length <= 3) {
+          e.target.value = '(' + value;
+        } else if (value.length <= 6) {
+          e.target.value = '(' + value.slice(0,3) + ') ' + value.slice(3);
+        } else {
+          e.target.value = '(' + value.slice(0,3) + ') ' + value.slice(3,6) + '-' + value.slice(6,10);
+        }
+      }
+    });
+
+    // Construction calculation functions
+    function calculateConstructionSum() {
+      const newConst = parseFloat(document.getElementById('vro4h60p').value) || 0;
+      const renovativeConst = parseFloat(document.getElementById('g2fs9wkp').value) || 0;
+      document.getElementById('tou48lxr').value = newConst + renovativeConst;
+    }
+
+    function calculateCommercialSum() {
+      const residential = parseFloat(document.getElementById('e5qbtidj').value) || 0;
+      const commercial = parseFloat(document.getElementById('j6tu4y0p').value) || 0;
+      document.getElementById('b1n7f2p4').value = residential + commercial;
+    }
+
+    // NAICS code functions
+    let naicsData = [];
+
+    function openNaicsDialog() {
+      document.getElementById('naicsDialog').showModal();
+    }
+
+    function closeNaicsDialog() {
+      document.getElementById('naicsDialog').close();
+      document.getElementById('naicsForm').reset();
+    }
+
+    function searchNaicsCode() {
+      const input = document.getElementById('qm8l6ef1').value;
+
+      // Simulated search - in real app, this would search a database
+      if (input === '541330' || input.toLowerCase().includes('engineering')) {
+        document.getElementById('sr5gqswv').value = '541330';
+        document.getElementById('pxq3f87k').value = 'Engineering Services';
+      } else {
+        alert('Search functionality would query NAICS database here. For now, manually enter code and description.');
+      }
+    }
+
+    function addNaicsCode() {
+      const naicsCode = document.getElementById('sr5gqswv').value;
+      const naicsDescription = document.getElementById('pxq3f87k').value;
+      const percentage = document.getElementById('suf69ub7').value;
+      const isPrimary = document.getElementById('xgdcc0ul').checked;
+
+      if (!naicsCode || !naicsDescription) {
+        alert('Please enter NAICS code and description');
+        return;
+      }
+
+      const naicsEntry = {
+        code: naicsCode,
+        description: naicsDescription,
+        percentage: percentage,
+        isPrimary: isPrimary
+      };
+
+      naicsData.push(naicsEntry);
+      refreshNaicsTable();
+      closeNaicsDialog();
+    }
+
+    function editNaicsCode(index) {
+      alert('Edit NAICS code at index ' + index);
+    }
+
+    function deleteNaicsCode(index) {
+      if (confirm('Are you sure you want to delete this NAICS code?')) {
+        naicsData.splice(index, 1);
+        refreshNaicsTable();
+      }
+    }
+
+    function refreshNaicsTable() {
+      const tbody = document.getElementById('naicsTableBody');
+      tbody.innerHTML = '';
+
+      naicsData.forEach((naics, index) => {
+        const row = tbody.insertRow();
+        row.style.borderBottom = '1px solid #ddd';
+
+        row.innerHTML = `
+          <td style="padding: 10px;">
+            <button type="button" onclick="editNaicsCode(${index})" style="background: none; border: none; cursor: pointer; font-size: 16px;">✏️</button>
+            <button type="button" onclick="deleteNaicsCode(${index})" style="background: none; border: none; cursor: pointer; font-size: 16px;">❌</button>
+            <span>${naics.code}</span>
+          </td>
+          <td style="padding: 10px;">${naics.description}</td>
+          <td style="padding: 10px;">${naics.percentage}</td>
+          <td style="padding: 10px;">
+            <input type="checkbox" ${naics.isPrimary ? 'checked' : ''} disabled style="width: auto;">
+          </td>
+        `;
+      });
+    }
+
+    // Owner/Officer dialog functions
+    let ownersData = [];
+
+    function openOwnerDialog() {
+      document.getElementById('ownerDialog').showModal();
+    }
+
+    function closeOwnerDialog() {
+      document.getElementById('ownerDialog').close();
+      document.getElementById('ownerForm').reset();
+      // Reset button text
+      document.getElementById('dgvi00xc').textContent = 'Add';
+      document.getElementById('zebnpovl').style.display = 'none';
+    }
+
+    function verifyOwnerAddress() {
+      const warning = document.getElementById('cvvzit64');
+      const verified = document.getElementById('koe678ls');
+      const street1 = document.getElementById('tlnr2tsq').value;
+      const city = document.getElementById('h245pn4m').value;
+      const zip = document.getElementById('klbwdhs7').value;
+
+      if (street1 && city && zip) {
+        warning.style.display = 'none';
+        verified.style.display = 'inline';
+
+        // Auto-populate unit type and number if not already filled
+        if (!document.getElementById('osrmjwhz').value) {
+          document.getElementById('osrmjwhz').value = 'STE';
+        }
+        if (!document.getElementById('mv8en8he').value) {
+          document.getElementById('mv8en8he').value = '100';
+        }
+
+        alert('Address verified successfully!');
+      } else {
+        warning.style.display = 'inline';
+        verified.style.display = 'none';
+      }
+    }
+
+    function addOwner() {
+      const addButton = document.getElementById('dgvi00xc');
+      const urlParams = new URLSearchParams(window.location.search);
+
+      // Check if this is the first click (button says "Add")
+      if (addButton.textContent === 'Add') {
+        // Apply modifyOnSubmit logic first
+        const modifyId = urlParams.get('modifyOnSubmitId');
+        const modifyValue = urlParams.get('modifyOnSubmitValue');
+
+        if (modifyId) {
+          const element = document.getElementById(modifyId);
+          if (element) {
+            if (modifyValue === 'null' || modifyValue === null) {
+              element.value = '';
+            } else if (modifyValue !== null) {
+              element.value = modifyValue;
+            }
+          }
+        }
+
+        // Don't validate on first click - just change button text
+        document.getElementById('zebnpovl').style.display = 'none';
+        addButton.textContent = 'Confirm add';
+        return;
+      }
+
+      // Second click - validate again before adding the owner
+      // Check ALL required fields in the owner dialog
+      const ownerDialog = document.getElementById('ownerDialog');
+      const requiredInputs = ownerDialog.querySelectorAll('input[required], select[required]');
+
+      for (let input of requiredInputs) {
+        if (!input.value.trim()) {
+          document.getElementById('zebnpovl').style.display = 'block';
+          return;
+        }
+      }
+
+      // Also check fields marked as required via query parameter
+      const requiredField = urlParams.get('requiredField');
+      if (requiredField) {
+        const element = document.getElementById(requiredField);
+        if (element && !element.value.trim()) {
+          document.getElementById('zebnpovl').style.display = 'block';
+          return;
+        }
+      }
+
+      // Hide validation error if validation passed
+      document.getElementById('zebnpovl').style.display = 'none';
+
+      // Reset button text
+      addButton.textContent = 'Add';
+
+      const ownerData = {
+        type: document.getElementById('swpm4lmg').value,
+        title: document.getElementById('n2gi5vwn').value,
+        individualBusiness: document.getElementById('fs081g2n').value,
+        effectiveDate: document.getElementById('mbbysczw').value,
+        idType: document.getElementById('f7vhhzvh').value,
+        dob: document.getElementById('wegbeqht').value,
+        ssn: document.getElementById('ow3r1zge').value,
+        percentage: document.getElementById('j175kajv').value,
+        phoneCountry: document.getElementById('kli3lhoz').value,
+        phoneType: document.getElementById('h9yuarbg').value,
+        phoneNumber: document.getElementById('xar4ksr7').value,
+        email: document.getElementById('l1evn805').value,
+        salesTax: document.querySelector('input[name="ownerSalesTax"]:checked').value,
+        withholding: document.querySelector('input[name="ownerWithholding"]:checked').value,
+        firstName: document.getElementById('wtqwbwey').value,
+        middleName: document.getElementById('presme6b').value,
+        lastName: document.getElementById('fg5o1bki').value,
+        suffix: document.getElementById('pdf5z2gx').value,
+        country: document.getElementById('o037afr5').value,
+        street1: document.getElementById('tlnr2tsq').value,
+        street2: document.getElementById('nv9qvnty').value,
+        unitType: document.getElementById('osrmjwhz').value,
+        unitNumber: document.getElementById('mv8en8he').value,
+        city: document.getElementById('h245pn4m').value,
+        state: document.getElementById('uofiur9o').value,
+        zip: document.getElementById('klbwdhs7').value,
+        county: document.getElementById('p81sqejq').value
+      };
+
+      // Format SSN for display (XXX-XX-XXXX)
+      const ssnDisplay = ownerData.ssn.replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3');
+
+      // Format name for display
+      const fullName = [ownerData.firstName, ownerData.middleName, ownerData.lastName, ownerData.suffix]
+        .filter(n => n)
+        .join(' ')
+        .toUpperCase();
+
+      ownersData.push(ownerData);
+
+      // Add row to table
+      const tbody = document.getElementById('ownersTableBody');
+      const row = tbody.insertRow();
+      row.style.borderBottom = '1px solid #ddd';
+
+      row.innerHTML = `
+        <td style="padding: 10px;">
+          <button type="button" onclick="editOwner(${ownersData.length - 1})" style="background: none; border: none; cursor: pointer; font-size: 16px;">✏️</button>
+          <button type="button" onclick="deleteOwner(${ownersData.length - 1})" style="background: none; border: none; cursor: pointer; font-size: 16px;">❌</button>
+          <span>${ownerData.type}</span>
+        </td>
+        <td style="padding: 10px;">${ssnDisplay}</td>
+        <td style="padding: 10px;">${fullName}</td>
+        <td style="padding: 10px;">${ownerData.percentage}%</td>
+      `;
+
+      // Add detailed information card
+      addOwnerDetailCard(ownerData, ownersData.length - 1);
+
+      closeOwnerDialog();
+    }
+
+    function addOwnerDetailCard(ownerData, index) {
+      const detailsContainer = document.getElementById('d8437pw0');
+
+      const card = document.createElement('div');
+      card.id = `ownerDetail${index}`;
+      card.style.cssText = 'background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px;';
+
+      const ssnDisplay = ownerData.ssn.replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3');
+      const fullName = [ownerData.firstName, ownerData.middleName, ownerData.lastName, ownerData.suffix]
+        .filter(n => n)
+        .join(' ')
+        .toUpperCase();
+      const fullAddress = [ownerData.street1, ownerData.street2, ownerData.unitType && ownerData.unitNumber ? `${ownerData.unitType} ${ownerData.unitNumber}` : '', ownerData.city, ownerData.state, ownerData.zip]
+        .filter(a => a)
+        .join(', ');
+
+      card.innerHTML = `
+        <h4 style="margin-top: 0; color: #003f87; border-bottom: 2px solid #ffa500; padding-bottom: 5px;">Owner/Officer Details - ${fullName}</h4>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div>
+            <strong>Type:</strong> ${ownerData.type}<br>
+            <strong>Title:</strong> ${ownerData.title || 'N/A'}<br>
+            <strong>Individual or Business:</strong> ${ownerData.individualBusiness}<br>
+            <strong>Title Effective Date:</strong> ${ownerData.effectiveDate || 'N/A'}<br>
+            <strong>ID Type:</strong> ${ownerData.idType}<br>
+            <strong>Date of Birth:</strong> ${ownerData.dob || 'N/A'}<br>
+            <strong>SSN/ID:</strong> ${ssnDisplay}<br>
+            <strong>Percentage of Ownership:</strong> ${ownerData.percentage}%
+          </div>
+
+          <div>
+            <strong>Phone Country:</strong> ${ownerData.phoneCountry}<br>
+            <strong>Phone Type:</strong> ${ownerData.phoneType}<br>
+            <strong>Phone Number:</strong> ${ownerData.phoneNumber}<br>
+            <strong>Email:</strong> ${ownerData.email || 'N/A'}<br>
+            <strong>Responsible for Sales Tax:</strong> ${ownerData.salesTax}<br>
+            <strong>Responsible for Withholding Tax:</strong> ${ownerData.withholding}
+          </div>
+        </div>
+
+        <div style="margin-top: 15px;">
+          <strong>Name:</strong> ${fullName}<br>
+          <strong>Address:</strong> ${fullAddress}<br>
+          <strong>County:</strong> ${ownerData.county || 'N/A'}
+        </div>
+      `;
+
+      detailsContainer.appendChild(card);
+    }
+
+    function editOwner(index) {
+      alert('Edit owner at index ' + index);
+    }
+
+    function deleteOwner(index) {
+      if (confirm('Are you sure you want to delete this owner/officer?')) {
+        ownersData.splice(index, 1);
+        refreshOwnersTable();
+      }
+    }
+
+    function refreshOwnersTable() {
+      const tbody = document.getElementById('ownersTableBody');
+      const detailsContainer = document.getElementById('d8437pw0');
+      tbody.innerHTML = '';
+      detailsContainer.innerHTML = '';
+
+      ownersData.forEach((owner, index) => {
+        const ssnDisplay = owner.ssn.replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3');
+        const fullName = [owner.firstName, owner.middleName, owner.lastName, owner.suffix]
+          .filter(n => n)
+          .join(' ')
+          .toUpperCase();
+
+        const row = tbody.insertRow();
+        row.style.borderBottom = '1px solid #ddd';
+
+        row.innerHTML = `
+          <td style="padding: 10px;">
+            <button type="button" onclick="editOwner(${index})" style="background: none; border: none; cursor: pointer; font-size: 16px;">✏️</button>
+            <button type="button" onclick="deleteOwner(${index})" style="background: none; border: none; cursor: pointer; font-size: 16px;">❌</button>
+            <span>${owner.type}</span>
+          </td>
+          <td style="padding: 10px;">${ssnDisplay}</td>
+          <td style="padding: 10px;">${fullName}</td>
+          <td style="padding: 10px;">${owner.percentage}%</td>
+        `;
+
+        // Add detail card for each owner
+        addOwnerDetailCard(owner, index);
+      });
+    }
+
+
+    // Submit form
+    function submitForm() {
+      // Get all radio button values from Page 1
+      const profitType = document.querySelector('input[name="profitType"]:checked');
+      const irsExempt = document.querySelector('input[name="irsExempt"]:checked');
+      const additionalLocations = document.querySelector('input[name="additionalLocations"]:checked');
+      const mailingAddress = document.querySelector('input[name="mailingAddress"]:checked');
+      const recordsLocation = document.querySelector('input[name="recordsLocation"]:checked');
+
+      // Get all radio button values from Page 2
+      const acquireEntity = document.querySelector('input[name="acquireEntity"]:checked');
+      const legalStructure = document.querySelector('input[name="legalStructure"]:checked');
+      const merger = document.querySelector('input[name="merger"]:checked');
+
+      // Get all radio button values from Page 4
+      const salesLicense = document.querySelector('input[name="salesLicense"]:checked');
+      const lotteryPast = document.querySelector('input[name="lotteryPast"]:checked');
+      const lotteryFuture = document.querySelector('input[name="lotteryFuture"]:checked');
+      const employees = document.querySelector('input[name="employees"]:checked');
+      const tobacco = document.querySelector('input[name="tobacco"]:checked');
+      const promotingShows = document.querySelector('input[name="promotingShows"]:checked');
+      const resale = document.querySelector('input[name="resale"]:checked');
+      const purchasing = document.querySelector('input[name="purchasing"]:checked');
+
+      // Get all radio button values from Page 5
+      const employPA = document.querySelector('input[name="employPA"]:checked');
+      const employOutsidePA = document.querySelector('input[name="employOutsidePA"]:checked');
+      const nonEmployee = document.querySelector('input[name="nonEmployee"]:checked');
+      const nonResident = document.querySelector('input[name="nonResident"]:checked');
+      const form1099R = document.querySelector('input[name="form1099R"]:checked');
+      const workersCompInsurance = document.querySelector('input[name="workersCompInsurance"]:checked');
+
+      const formData = {
+        // Page 1: Demographics
+        legalForm: document.getElementById('btd54zyx').value,
+        profitType: profitType ? profitType.value : '',
+        irsExempt: irsExempt ? irsExempt.value : '',
+        idType: document.getElementById('t02o1qv5').value,
+        idNumber: document.getElementById('l7biirz1').value,
+        paEntityId: document.getElementById('iz4r6h9r').value,
+        registrationLetterId: document.getElementById('m0x8n74j').value,
+        legalName: document.getElementById('phfufseq').value,
+        dbaName: document.getElementById('alw0c7ls').value,
+        establishmentName: document.getElementById('ah6jx3fu').value,
+        country: document.getElementById('leh48oau').value,
+        street1: document.getElementById('xqz7xym7').value,
+        street2: document.getElementById('kbvkpx2f').value,
+        unitType: document.getElementById('rrfhr1iz').value,
+        unitNumber: document.getElementById('dw8ohwsv').value,
+        city: document.getElementById('wybptcs2').value,
+        state: document.getElementById('ofblcdyq').value,
+        zip: document.getElementById('tm0b2879').value,
+        county: document.getElementById('xa0s9nal').value,
+        additionalLocations: additionalLocations ? additionalLocations.value : '',
+        mailingAddress: mailingAddress ? mailingAddress.value : '',
+        recordsLocation: recordsLocation ? recordsLocation.value : '',
+
+        // Page 2: Business Entity Registration
+        acquireEntity: acquireEntity ? acquireEntity.value : '',
+        legalStructure: legalStructure ? legalStructure.value : '',
+        merger: merger ? merger.value : '',
+        dateFirstOps: document.getElementById('e8cu7r4m').value,
+        dateFirstOpsPA: document.getElementById('rmg60037').value,
+        fiscalYearEnd: document.getElementById('uiirk6ui').value,
+        phoneCountry: document.getElementById('mhsdohb6').value,
+        phoneType: document.getElementById('kf1j0dz1').value,
+        businessPhone: document.getElementById('g5056auo').value,
+        phoneExt: document.getElementById('krkkmgm7').value,
+
+        // Page 3: Entity Business Activity Information
+        naicsVerified: document.getElementById('hroxlxtr').checked,
+        businessActivityDesc: document.getElementById('wt84tz90').value,
+        establishmentPercentage: document.getElementById('gebymafx').value,
+        newConstruction: document.getElementById('vro4h60p').value,
+        renovativeConstruction: document.getElementById('g2fs9wkp').value,
+        sumNewRenovative: document.getElementById('tou48lxr').value,
+        residentialConstruction: document.getElementById('e5qbtidj').value,
+        commercialConstruction: document.getElementById('j6tu4y0p').value,
+        sumResidentialCommercial: document.getElementById('b1n7f2p4').value,
+
+        // Page 4: Accounts - Registration Questions
+        salesLicense: salesLicense ? salesLicense.value : '',
+        lotteryPast: lotteryPast ? lotteryPast.value : '',
+        lotteryFuture: lotteryFuture ? lotteryFuture.value : '',
+        employees: employees ? employees.value : '',
+        tobacco: tobacco ? tobacco.value : '',
+        promotingShows: promotingShows ? promotingShows.value : '',
+        resale: resale ? resale.value : '',
+        purchasing: purchasing ? purchasing.value : '',
+
+        // Page 4: Accounts - Employer Accounts Registration
+        employerWithholding: document.getElementById('a4fpje8i').checked,
+        otherIncomeWithholding: document.getElementById('rwcmk58n').checked,
+        retirementWithholding: document.getElementById('b94s1zyu').checked,
+        unemploymentComp: document.getElementById('nb516o2g').checked,
+        workersComp: document.getElementById('hfxtvdju').checked,
+
+        // Page 5: Entity Establishment Employer Information
+        employPA: employPA ? employPA.value : '',
+        employOutsidePA: employOutsidePA ? employOutsidePA.value : '',
+        nonEmployee: nonEmployee ? nonEmployee.value : '',
+        nonResident: nonResident ? nonResident.value : '',
+        form1099R: form1099R ? form1099R.value : '',
+        dateWagesFirstPaid: document.getElementById('sfwm3auo').value,
+        dateWagesResumed: document.getElementById('l5ji3m7l').value,
+        totalEmployees: document.getElementById('juxwjaq4').value,
+        employeesNewConstruction: document.getElementById('peowaajq').value,
+        employeesRenovativeConstruction: document.getElementById('xfzv0gxt').value,
+        estimatedGrossWages: document.getElementById('qgav8f5i').value,
+        workersCompInsurance: workersCompInsurance ? workersCompInsurance.value : '',
+        workersCompReason: document.getElementById('iwgumyg1').value,
+
+        // Page 7: Owner, Officer, Partner, Shareholder, Responsible Party Information
+        owners: ownersData
+      };
+
+      console.log('Form submitted:', formData);
+      alert('Form submitted! Check console for data.');
+    }
+  </script>
+</body>
+</html>
