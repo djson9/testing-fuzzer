@@ -1487,6 +1487,11 @@
             radioGroup.appendChild(label2);
 
             newFormGroup.appendChild(radioGroup);
+          } else if (addFieldType === 'date') {
+            const input = document.createElement('input');
+            input.type = 'date';
+            input.id = 'additionalField';
+            newFormGroup.appendChild(input);
           }
 
           // Insert after the registration letter ID field
