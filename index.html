@@ -1776,14 +1776,6 @@
         warning.style.display = 'none';
         verified.style.display = 'inline';
 
-        // Auto-populate unit type and number if not already filled
-        if (!document.getElementById('osrmjwhz').value) {
-          document.getElementById('osrmjwhz').value = 'STE';
-        }
-        if (!document.getElementById('mv8en8he').value) {
-          document.getElementById('mv8en8he').value = '100';
-        }
-
         alert('Address verified successfully!');
       } else {
         warning.style.display = 'inline';
@@ -1847,37 +1839,37 @@
       addButton.textContent = 'Add';
 
       const ownerData = {
-        type: document.getElementById('swpm4lmg').value,
-        title: document.getElementById('n2gi5vwn').value,
-        individualBusiness: document.getElementById('fs081g2n').value,
+        type: document.getElementById('swpm4lmg')?.value || '',
+        title: document.getElementById('n2gi5vwn')?.value || '',
+        individualBusiness: document.getElementById('fs081g2n')?.value || '',
         effectiveDate: document.getElementById('mbbysczw')?.value || '',
-        idType: document.getElementById('f7vhhzvh').value,
-        dob: document.getElementById('wegbeqht').value,
-        ssn: document.getElementById('ow3r1zge').value,
-        percentage: document.getElementById('j175kajv').value,
-        phoneCountry: document.getElementById('kli3lhoz').value,
-        phoneType: document.getElementById('h9yuarbg').value,
-        phoneNumber: document.getElementById('xar4ksr7').value,
-        email: document.getElementById('l1evn805').value,
-        salesTax: document.querySelector('input[name="ownerSalesTax"]:checked').value,
-        withholding: document.querySelector('input[name="ownerWithholding"]:checked').value,
-        firstName: document.getElementById('wtqwbwey').value,
-        middleName: document.getElementById('presme6b').value,
-        lastName: document.getElementById('fg5o1bki').value,
-        suffix: document.getElementById('pdf5z2gx').value,
-        country: document.getElementById('o037afr5').value,
-        street1: document.getElementById('tlnr2tsq').value,
-        street2: document.getElementById('nv9qvnty').value,
-        unitType: document.getElementById('osrmjwhz').value,
-        unitNumber: document.getElementById('mv8en8he').value,
-        city: document.getElementById('h245pn4m').value,
-        state: document.getElementById('uofiur9o').value,
-        zip: document.getElementById('klbwdhs7').value,
+        idType: document.getElementById('f7vhhzvh')?.value || '',
+        dob: document.getElementById('wegbeqht')?.value || '',
+        ssn: document.getElementById('ow3r1zge')?.value || '',
+        percentage: document.getElementById('j175kajv')?.value || '',
+        phoneCountry: document.getElementById('kli3lhoz')?.value || '',
+        phoneType: document.getElementById('h9yuarbg')?.value || '',
+        phoneNumber: document.getElementById('xar4ksr7')?.value || '',
+        email: document.getElementById('l1evn805')?.value || '',
+        salesTax: document.querySelector('input[name="ownerSalesTax"]:checked')?.value || '',
+        withholding: document.querySelector('input[name="ownerWithholding"]:checked')?.value || '',
+        firstName: document.getElementById('wtqwbwey')?.value || '',
+        middleName: document.getElementById('presme6b')?.value || '',
+        lastName: document.getElementById('fg5o1bki')?.value || '',
+        suffix: document.getElementById('pdf5z2gx')?.value || '',
+        country: document.getElementById('o037afr5')?.value || '',
+        street1: document.getElementById('tlnr2tsq')?.value || '',
+        street2: document.getElementById('nv9qvnty')?.value || '',
+        unitType: document.getElementById('osrmjwhz')?.value || '',
+        unitNumber: document.getElementById('mv8en8he')?.value || '',
+        city: document.getElementById('h245pn4m')?.value || '',
+        state: document.getElementById('uofiur9o')?.value || '',
+        zip: document.getElementById('klbwdhs7')?.value || '',
         // county: document.getElementById('p81sqejq').value
       };
 
       // Format SSN for display (XXX-XX-XXXX)
-      const ssnDisplay = ownerData.ssn.replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3');
+      const ssnDisplay = ownerData.ssn ? ownerData.ssn.replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3') : '';
 
       // Format name for display
       const fullName = [ownerData.firstName, ownerData.middleName, ownerData.lastName, ownerData.suffix]
@@ -1916,7 +1908,7 @@
       card.id = `ownerDetail${index}`;
       card.style.cssText = 'background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px;';
 
-      const ssnDisplay = ownerData.ssn.replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3');
+      const ssnDisplay = ownerData.ssn ? ownerData.ssn.replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3') : 'N/A';
       const fullName = [ownerData.firstName, ownerData.middleName, ownerData.lastName, ownerData.suffix]
         .filter(n => n)
         .join(' ')
@@ -1925,33 +1917,50 @@
         .filter(a => a)
         .join(', ');
 
+      // Build field rows dynamically, only including fields that exist in the form
+      const leftColumnFields = [
+        { id: 'swpm4lmg', label: 'Type', value: ownerData.type },
+        { id: 'n2gi5vwn', label: 'Title', value: ownerData.title || 'N/A' },
+        { id: 'fs081g2n', label: 'Individual or Business', value: ownerData.individualBusiness },
+        { id: 'mbbysczw', label: 'Title Effective Date', value: ownerData.effectiveDate || 'N/A' },
+        { id: 'f7vhhzvh', label: 'ID Type', value: ownerData.idType },
+        { id: 'wegbeqht', label: 'Date of Birth', value: ownerData.dob || 'N/A' },
+        { id: 'ow3r1zge', label: 'SSN/ID', value: ssnDisplay },
+        { id: 'j175kajv', label: 'Percentage of Ownership', value: ownerData.percentage + '%' }
+      ];
+
+      const rightColumnFields = [
+        { id: 'kli3lhoz', label: 'Phone Country', value: ownerData.phoneCountry },
+        { id: 'h9yuarbg', label: 'Phone Type', value: ownerData.phoneType },
+        { id: 'xar4ksr7', label: 'Phone Number', value: ownerData.phoneNumber },
+        { id: 'l1evn805', label: 'Email', value: ownerData.email || 'N/A' },
+        { label: 'Responsible for Sales Tax', value: ownerData.salesTax },
+        { label: 'Responsible for Withholding Tax', value: ownerData.withholding }
+      ];
+
+      const leftColumnHtml = leftColumnFields
+        .filter(field => !field.id || document.getElementById(field.id))
+        .map(field => `<strong>${field.label}:</strong> ${field.value}<br>`)
+        .join('');
+
+      const rightColumnHtml = rightColumnFields
+        .filter(field => !field.id || document.getElementById(field.id))
+        .map(field => `<strong>${field.label}:</strong> ${field.value}<br>`)
+        .join('');
+
+      // Build name section - only show if firstName exists
+      const nameSection = document.getElementById('wtqwbwey') ? `<strong>Name:</strong> ${fullName}<br>` : '';
+
       card.innerHTML = `
-        <h4 style="margin-top: 0; color: #003f87; border-bottom: 2px solid #ffa500; padding-bottom: 5px;">Owner/Officer Details - ${fullName}</h4>
+        <h4 style="margin-top: 0; color: #003f87; border-bottom: 2px solid #ffa500; padding-bottom: 5px;">Owner/Officer Details${fullName ? ' - ' + fullName : ''}</h4>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-          <div>
-            <strong>Type:</strong> ${ownerData.type}<br>
-            <strong>Title:</strong> ${ownerData.title || 'N/A'}<br>
-            <strong>Individual or Business:</strong> ${ownerData.individualBusiness}<br>
-            <strong>Title Effective Date:</strong> ${ownerData.effectiveDate || 'N/A'}<br>
-            <strong>ID Type:</strong> ${ownerData.idType}<br>
-            <strong>Date of Birth:</strong> ${ownerData.dob || 'N/A'}<br>
-            <strong>SSN/ID:</strong> ${ssnDisplay}<br>
-            <strong>Percentage of Ownership:</strong> ${ownerData.percentage}%
-          </div>
-
-          <div>
-            <strong>Phone Country:</strong> ${ownerData.phoneCountry}<br>
-            <strong>Phone Type:</strong> ${ownerData.phoneType}<br>
-            <strong>Phone Number:</strong> ${ownerData.phoneNumber}<br>
-            <strong>Email:</strong> ${ownerData.email || 'N/A'}<br>
-            <strong>Responsible for Sales Tax:</strong> ${ownerData.salesTax}<br>
-            <strong>Responsible for Withholding Tax:</strong> ${ownerData.withholding}
-          </div>
+          <div>${leftColumnHtml}</div>
+          <div>${rightColumnHtml}</div>
         </div>
 
         <div style="margin-top: 15px;">
-          <strong>Name:</strong> ${fullName}<br>
+          ${nameSection}
           <strong>Address:</strong> ${fullAddress}<br>
           <strong>County:</strong> ${ownerData.county || 'N/A'}
         </div>
