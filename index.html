@@ -1494,6 +1494,19 @@
             input.type = 'date';
             input.id = 'additionalField';
             newFormGroup.appendChild(input);
+          } else if (addFieldType === 'checkbox') {
+            const checkboxContainer = document.createElement('div');
+            checkboxContainer.className = 'checkbox-container';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = 'additionalField';
+            checkbox.style.width = 'auto';
+            checkbox.style.display = 'inline-block';
+            checkbox.style.marginRight = '8px';
+
+            checkboxContainer.appendChild(checkbox);
+            newFormGroup.appendChild(checkboxContainer);
           }
 
           // Insert after the registration letter ID field
