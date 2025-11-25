@@ -892,14 +892,6 @@
       <!-- Owner detail cards will be added here -->
     </div>
 
-    <!-- Owner Signature Consent Checkbox -->
-    <div style="margin-top: 30px; margin-bottom: 20px;">
-      <label style="display: flex; align-items: center; cursor: pointer;">
-        <input type="checkbox" id="owner_consent_chk" name="owner_consent_chk" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-        <span>Owner information consent</span>
-      </label>
-    </div>
-
     <div class="button-bar">
       <button onclick="goToPage(6)">← Back</button>
       <button id="actionButton" onclick="handleAction()">Submit</button>
@@ -1124,6 +1116,15 @@
           </select>
         </div> -->
 
+        <h3 style="color: #003f87; margin-top: 20px;">Owner Consent</h3>
+        <div class="form-group">
+          <label style="display: flex; align-items: center; cursor: pointer;">
+            <input type="checkbox" id="owner_consent_chk" name="owner_consent_chk" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+            <span>Owner signature consent</span>
+          </label>
+        </div>
+
+        <h3 style="color: #003f87; margin-top: 20px;">Address Verification</h3>
         <div class="form-group">
           <button type="button" onclick="verifyOwnerAddress()" style="background: #003f87; color: white; width: 200px; padding: 10px; border: none; cursor: pointer;">Verify Address</button>
           <span id="cvvzit64" style="color: #d32f2f; margin-left: 10px; display: none;">⚠️ Address needs to be verified</span>
