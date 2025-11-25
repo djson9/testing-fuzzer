@@ -1534,11 +1534,18 @@
           if (element.type === 'radio') {
             // For radio buttons, find the one with the matching value
             const radioGroup = document.querySelectorAll(`input[name="${element.name}"]`);
-            radioGroup.forEach(radio => {
-              if (radio.value === initialFieldValue) {
-                radio.checked = true;
-              }
-            });
+            if (initialFieldValue === 'unchecked' || initialFieldValue === 'null' || initialFieldValue === 'none') {
+              // Uncheck all radios in the group
+              radioGroup.forEach(radio => {
+                radio.checked = false;
+              });
+            } else {
+              radioGroup.forEach(radio => {
+                if (radio.value === initialFieldValue) {
+                  radio.checked = true;
+                }
+              });
+            }
           } else if (element.type === 'checkbox') {
             element.checked = (initialFieldValue === 'true' || initialFieldValue === 'checked');
           } else {
