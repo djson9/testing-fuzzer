@@ -1818,10 +1818,20 @@
         if (modifyId) {
           const element = document.getElementById(modifyId);
           if (element) {
-            if (modifyValue === 'null' || modifyValue === null) {
-              element.value = '';
-            } else if (modifyValue !== null) {
-              element.value = modifyValue;
+            if (element.type === 'radio' || element.type === 'checkbox') {
+              // For radio/checkbox, set checked property
+              if (modifyValue === 'unchecked' || modifyValue === 'null' || modifyValue === null) {
+                element.checked = false;
+              } else if (modifyValue === 'checked' || modifyValue === 'true') {
+                element.checked = true;
+              }
+            } else {
+              // For other inputs, set value
+              if (modifyValue === 'null' || modifyValue === null) {
+                element.value = '';
+              } else if (modifyValue !== null) {
+                element.value = modifyValue;
+              }
             }
           }
         }
