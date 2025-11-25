@@ -1885,6 +1885,7 @@
         email: document.getElementById('l1evn805')?.value || '',
         salesTax: document.querySelector('input[name="ownerSalesTax"]:checked')?.value || '',
         withholding: document.querySelector('input[name="ownerWithholding"]:checked')?.value || '',
+        ownerConsent: document.getElementById('owner_consent_chk')?.checked ? 'checked' : 'unchecked',
         firstName: document.getElementById('wtqwbwey')?.value || '',
         middleName: document.getElementById('presme6b')?.value || '',
         lastName: document.getElementById('fg5o1bki')?.value || '',
@@ -1967,7 +1968,8 @@
         { id: 'xar4ksr7', label: 'Phone Number', value: ownerData.phoneNumber },
         { id: 'l1evn805', label: 'Email', value: ownerData.email || 'N/A' },
         { label: 'Responsible for Sales Tax', value: ownerData.salesTax },
-        { label: 'Responsible for Withholding Tax', value: ownerData.withholding }
+        { label: 'Responsible for Withholding Tax', value: ownerData.withholding },
+        { label: 'Owner signature consent', value: ownerData.ownerConsent }
       ];
 
       const leftColumnHtml = leftColumnFields
