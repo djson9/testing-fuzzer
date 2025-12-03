@@ -1252,7 +1252,12 @@
       const requiredInputs = page.querySelectorAll('input[required], select[required]');
 
       for (let input of requiredInputs) {
-        if (!input.value.trim()) {
+        // Handle checkboxes differently - they use .checked, not .value
+        if (input.type === 'checkbox') {
+          if (!input.checked) {
+            return false;
+          }
+        } else if (!input.value.trim()) {
           return false;
         }
       }
